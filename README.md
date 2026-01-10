@@ -1,3 +1,5 @@
+## The initial setup
+
 ### 1. Clone the repository using 
 ```
 git clone https://github.com/adityaachar01/montycloud-image-uploader.git
@@ -38,4 +40,6 @@ git clone https://github.com/adityaachar01/montycloud-image-uploader.git
 
 
 ### 6. After running the command in step 5 you will get instructions to access URLs 
+
+## Using the End points
     
