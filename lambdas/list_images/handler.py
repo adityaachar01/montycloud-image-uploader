@@ -8,11 +8,13 @@ from boto3.dynamodb.conditions import Attr
 dynamodb = boto3.resource("dynamodb", endpoint_url=os.getenv("DYNAMODB_URL", None))
 images = dynamodb.Table('Images')
 
+## Function to convert Decimal to float for JSON serialization
 def decimal_default(obj):
     if isinstance(obj, Decimal):
         return float(obj)
     raise TypeError
 
+## Helper function to validate if a value can be converted to Decimal
 def is_valid_number(value):
     try:
         Decimal(str(value))
@@ -30,8 +32,7 @@ def handler(event, context):
         query_params = event.get("queryStringParameters", {}) or None
 
         if not query_params:
-            response = images.scan()
-            print(f"===Response== {response}")
+            response = images.scan()            
             image_items = response.get('Items', [])            
 
         else:
@@ -58,8 +59,7 @@ def handler(event, context):
             if attr_filter:
                 scan_kwargs['FilterExpression'] = attr_filter
 
-            response = images.scan(**scan_kwargs)
-            print(f"===Response with pagination== {response}")
+            response = images.scan(**scan_kwargs)            
             image_items = response.get('Items', [])
             last_key = response.get('LastEvaluatedKey', None)
 
