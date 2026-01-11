@@ -93,10 +93,15 @@ echo "GET Images: http://localhost:4566/restapis/$API_ID/dev/_user_request_/get-
 echo "DELETE Image: http://localhost:4566/restapis/$API_ID/dev/_user_request_/delete-image/{imageid}"
 echo "GET Presigned URL: http://localhost:4566/restapis/$API_ID/dev/_user_request_/get-presigned-url"
 
+echo -e "\n\n"
+
 echo "OR"
 
-echo "Simply use the following format:"
+echo -e "\n\n"
+
+echo -e "Simply use the following format:\n"
 echo "http://$API_ID.execute-api.localhost.localstack.cloud:4566/dev/<ENPOINT>"
+echo -e "\n\n"
 echo "Replace <ENDPOINT> with get-images, delete-image/{imageid}, or get-presigned-url as needed."
 
 echo "DONE!!"

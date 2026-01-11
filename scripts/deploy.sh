@@ -36,7 +36,7 @@ awslocal lambda create-function \
     --function-name get-presigned-url \
     --runtime python3.11 \
     --timeout 10 \
-    --zip-file fileb://lambdas/get-presigned-url/lambda.zip \
+    --zip-file fileb://lambdas/get_presigned_url/lambda.zip \
     --handler handler.handler \
     --role arn:aws:iam::000000000000:role/lambda-role \
     --environment Variables="{BUCKET_NAME=montycloud-images-aditya}"
@@ -51,7 +51,7 @@ awslocal lambda create-function \
     --function-name list-images \
     --runtime python3.11 \
     --timeout 10 \
-    --zip-file fileb://lambdas/list-images/lambda.zip \
+    --zip-file fileb://lambdas/list_images/lambda.zip \
     --handler handler.handler \
     --role arn:aws:iam::000000000000:role/lambda-role \
     --environment Variables="{BUCKET_NAME=montycloud-images-aditya,DYNAMODB_URL=http://localhost.localstack.cloud:4566}"
@@ -67,7 +67,7 @@ awslocal lambda create-function \
     --function-name delete-image \
     --runtime python3.11 \
     --timeout 10 \
-    --zip-file fileb://lambdas/delete-image/lambda.zip \
+    --zip-file fileb://lambdas/delete_image/lambda.zip \
     --handler handler.handler \
     --role arn:aws:iam::000000000000:role/lambda-role \
     --environment Variables="{BUCKET_NAME=montycloud-images-aditya,DYNAMODB_URL=http://localhost.localstack.cloud:4566}"
@@ -84,7 +84,7 @@ awslocal lambda create-function \
     --function-name store-image-metadata \
     --runtime python3.11 \
     --timeout 10 \
-    --zip-file fileb://lambdas/store-image-metadata/lambda.zip \
+    --zip-file fileb://lambdas/store_image_metadata/lambda.zip \
     --handler handler.handler \
     --role arn:aws:iam::000000000000:role/lambda-role \
     --environment Variables="{BUCKET_NAME=montycloud-images-aditya,S3_ENDPOINT=http://localhost.localstack.cloud:4566,DYNAMODB_URL=http://localhost.localstack.cloud:4566}"

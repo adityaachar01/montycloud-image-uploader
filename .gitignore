@@ -1,2 +1,6 @@
 .venv/
 lambdas/*/lambda.zip
+tests/__pycache__/
+lambdas/*/__pycache__/
+tests/.pytest_cache/
+.pytest_cache
