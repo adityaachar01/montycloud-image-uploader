@@ -2,6 +2,7 @@
 import json
 import boto3
 import os
+from boto3.dynamodb.conditions import Key
 
 s3_client = boto3.client("s3", endpoint_url=os.getenv("S3_ENDPOINT", None))
 dynamodb = boto3.resource("dynamodb", endpoint_url=os.getenv("DYNAMODB_URL", None))
@@ -11,40 +12,45 @@ images = dynamodb.Table('Images')
 def handler(event, context):    
     try:
 
-        method = event.get('requestContext', {}).get('http', {}).get('method')
+        # 1. Safely get pathParameters (prevents NoneType errors)
+        path_params = event.get('pathParameters') or {}
+        
+        # 2. Access the 'imageid' key (matches the {imageid} in your script)
+        image_id = path_params.get('imageid')
 
-        ## Ensure only DELETE method is allowed
-        if method != 'DELETE':
+        if not image_id:
             return {
-                'statusCode': 405,
-                'body': json.dumps({'error': f'Method {method} not allowed. Use DELETE.'})
+                "statusCode": 400,
+                "body": json.dumps({"error": "Missing Image ID in path"})
             }
 
-        raw_path = event.get('rawPath', '')
-
-        # Simple logic to get the image_id from the end of the path
-        image_id = raw_path.split('/')[-1]
-
-        response = images.delete_item(
-        Key={'ID': image_id},
-        ReturnValues='ALL_OLD'
+        # 2. Query DynamoDB to find the record
+        response = images.query(
+            KeyConditionExpression=Key('ID').eq(image_id)
         )
+        items = response.get('Items', [])
 
-        ## Code to delete the actual image from S3 as well        
-        s3_client.delete_object(Bucket=os.getenv("BUCKET_NAME", None), Key=image_id)
+        if not items:
+            return {"statusCode": 404, "body": "Image record not found in database"}
+        # 3. Get the Path from the result
+        s3_key_to_delete = items[0].get('Path')
+        
 
-        # Check if 'Attributes' exists in the response
-        # If it's there, the item existed. If not, the item was already gone.
-        if 'Attributes' in response:
+        if s3_key_to_delete:
+            # 4. Delete from S3
+            s3_client.delete_object(Bucket=os.environ['BUCKET_NAME'], Key=s3_key_to_delete)
+
+            # 5. Delete from DynamoDB
+            images.delete_item(Key={'ID': image_id})
+
             return {
-                'statusCode': 204, # Success, no content to return
-                'body': json.dumps({'message': 'Image deleted successfully'})
+                "statusCode": 200, 
+                "body": json.dumps({
+                    "message": f"Deleted record {image_id} and S3 object {s3_key_to_delete}"
+                })
             }
-        else:
-            return {
-                'statusCode': 404,
-                'body': json.dumps({'error': 'Image not found'})
-            }
+    
+        return {"statusCode": 500, "body": "Record found, but S3 key was missing"}
     
     except Exception as e:
 
