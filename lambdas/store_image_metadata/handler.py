@@ -3,12 +3,9 @@ import boto3
 import json
 import uuid
 
-print("Loading function store-image-metadata")
 # Initialize clients
 s3_client = boto3.client("s3", endpoint_url=os.getenv("S3_ENDPOINT", None))
-print("Initialized S3 client")
 dynamodb = boto3.resource("dynamodb", endpoint_url=os.getenv("DYNAMODB_URL", None))
-print("Initialized DynamoDB resource")
 table = dynamodb.Table('Images')
 
 
