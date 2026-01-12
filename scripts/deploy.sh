@@ -106,6 +106,21 @@ awslocal s3api put-bucket-notification-configuration \
     --bucket montycloud-images-aditya \
     --notification-configuration file://triggers/file-upload.json
 
+
+awslocal lambda create-function \
+    --function-name get-presigned-download-url \
+    --runtime python3.11 \
+    --timeout 10 \
+    --zip-file fileb://lambdas/get_presigned_download_url/lambda.zip \
+    --handler handler.handler \
+    --role arn:aws:iam::000000000000:role/lambda-role \
+    --environment Variables="{BUCKET_NAME=montycloud-images-aditya,DYNAMODB_URL=http://localhost.localstack.cloud:4566}"
+
+awslocal lambda create-function-url-config \
+    --function-name get-presigned-download-url \
+    --auth-type NONE
+
+
 echo "Fetching function URL for 'hello-world' Lambda..."
 awslocal lambda list-function-url-configs --function-name hello-world --output json | jq -r '.FunctionUrlConfigs[0].FunctionUrl'
 
