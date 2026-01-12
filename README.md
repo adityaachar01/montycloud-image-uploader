@@ -102,4 +102,20 @@ curl --location --request DELETE 'http://<API_ID>.execute-api.localhost.localsta
 ```
 Will delete entry from DynamoDB table Images and also delete resource from S3
 
+### 5. Acess the GET /get-presigned-download-url to View/Download an image
+
+Following request will simply return a response with url for viewing the image
+
+```
+curl --location 'http://<API_ID>.execute-api.localhost.localstack.cloud:4566/dev/get-presigned-download-url/<ID>
+```
+
+Following request will simply return a response with url for "Downloading" the image
+
+```
+curl --location 'http://<API_ID>.execute-api.localhost.localstack.cloud:4566/dev/get-presigned-download-url/<ID>?download=true
+```
+
+
+
 
