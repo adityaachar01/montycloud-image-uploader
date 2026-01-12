@@ -25,6 +25,11 @@ PRESIGNED_ID=$(awslocal apigateway create-resource \
     --path-part "get-presigned-url" \
     --region us-east-1 --query 'id' --output text)
 
+# Path 4: /get-presigned-download-url/{imageid}
+DOWNLOAD_BASE_ID=$(awslocal apigateway create-resource --rest-api-id $API_ID --parent-id $ROOT_ID --path-part "get-presigned-download-url" --query 'id' --output text)
+DOWNLOAD_PARAM_ID=$(awslocal apigateway create-resource --rest-api-id $API_ID --parent-id $DOWNLOAD_BASE_ID --path-part "{imageid}" --query 'id' --output text)
+
+
 echo "Creating methods and integrations..."
 echo "Setting up GET /get-images"
 
@@ -58,6 +63,14 @@ awslocal apigateway put-integration \
     --uri arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:000000000000:function:get-presigned-url/invocations \
     --region us-east-1
 
+echo "Setting up GET /get-presigned-download-url/{imageid}"
+
+awslocal apigateway put-method --rest-api-id $API_ID --resource-id $DOWNLOAD_PARAM_ID --http-method GET --authorization-type "NONE"
+
+awslocal apigateway put-integration --rest-api-id $API_ID --resource-id $DOWNLOAD_PARAM_ID --http-method GET --type AWS_PROXY --integration-http-method POST \
+--uri arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:000000000000:function:get-presigned-download-url/invocations
+
+
 echo "Deploying the API to 'dev' stage..."
 awslocal apigateway create-deployment --rest-api-id $API_ID --stage-name dev
 
@@ -87,11 +100,20 @@ awslocal lambda add-permission \
   --principal apigateway.amazonaws.com \
   --source-arn "arn:aws:execute-api:us-east-1:000000000000:$API_ID/*/*/*"
 
+# Permission for get-presigned-download-url
+awslocal lambda add-permission \
+  --function-name get-presigned-download-url \
+  --statement-id apigw-download \
+  --action lambda:InvokeFunction \
+  --principal apigateway.amazonaws.com \
+  --source-arn "arn:aws:execute-api:us-east-1:000000000000:$API_ID/*/*/*"
+
 echo "API Gateway setup complete. API ID: $API_ID"
 echo "You can access the API endpoints at the following URLs:"
 echo "GET Images: http://localhost:4566/restapis/$API_ID/dev/_user_request_/get-images"
 echo "DELETE Image: http://localhost:4566/restapis/$API_ID/dev/_user_request_/delete-image/{imageid}"
 echo "GET Presigned URL: http://localhost:4566/restapis/$API_ID/dev/_user_request_/get-presigned-url"
+echo "GET Presigned Download URL: http://localhost:4566/restapis/$API_ID/dev/_user_request_/get-presigned-download-url/{imageid}"
 
 echo -e "\n\n"
 
@@ -102,6 +124,6 @@ echo -e "\n\n"
 echo -e "Simply use the following format:\n"
 echo "http://$API_ID.execute-api.localhost.localstack.cloud:4566/dev/<ENPOINT>"
 echo -e "\n\n"
-echo "Replace <ENDPOINT> with get-images, delete-image/{imageid}, or get-presigned-url as needed."
+echo "Replace <ENDPOINT> with get-images, delete-image/{imageid}, get-presigned-url, get-presigned-download-url/{imageid} as needed."
 
 echo "DONE!!"
